@@ -13,15 +13,17 @@ fn get_value(play: &str) -> i32 {
 fn get_points(entrystring: &str) -> i32 {
   let plays = entrystring.split(" ").collect::<Vec<&str>>();
   let opponent_play = get_value(plays[0]);
-  let self_play = get_value(plays[1]);
-  // 1 == opponent wins, 0 == tie, -1 == self wins
-  // edge cases: 3 - 1 == 2 self wins, 1 - 3 == -2 oppo wins
-  // +2, %3 to yield 0=oppo, 1=self, 2=tie
-  let winner = (opponent_play - self_play + 2) % 3;
-  match winner {
-  0 => return 0+self_play,
-  1 => return 6+self_play,
+  println!("Opponent play {}", opponent_play);
+  // 1=lose, 2=draw, 3=win
+  let outcome = get_value(plays[1]);
+  println!("outcome {}", outcome);
+  // calculate self play
+  let self_play = (opponent_play + outcome + 3) % 3 + 1;
+  println!("calculated self_play {}", self_play);
+  match outcome {
+  1 => return 0+self_play,
   2 => return 3+self_play,
+  3 => return 6+self_play,
   _ => return 0
   }
 }
