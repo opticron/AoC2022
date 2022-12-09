@@ -11,14 +11,20 @@ fn get_item_priority(item: char) -> u32 {
   return 0;
 }
 
-fn get_priority(entrystring: &str) -> u32 {
-  let priorities: Vec<u32> = entrystring.chars().map(|entry| get_item_priority(entry)).collect();
-  let partition1 = &priorities[0..priorities.len()/2];
-  let partition2 = &priorities[priorities.len()/2..priorities.len()];
+fn get_priority(entrystring: Vec<&str>) -> u32 {
+  let priorities1: Vec<u32> = entrystring[0].chars().map(|entry| get_item_priority(entry)).collect();
+  let priorities2: Vec<u32> = entrystring[1].chars().map(|entry| get_item_priority(entry)).collect();
+  let priorities3: Vec<u32> = entrystring[2].chars().map(|entry| get_item_priority(entry)).collect();
   // trivial bit, find common item...
-  for p1item in partition1.iter() {
-    for p2item in partition2.iter() {
-      if p1item == p2item {
+  for p1item in priorities1.iter() {
+    for p2item in priorities2.iter() {
+      if p1item != p2item {
+        continue;
+      }
+      for p3item in priorities3.iter() {
+        if p3item != p2item {
+          continue;
+        }
         println!("Found shared priority {}", *p1item);
         return *p1item;
       }
@@ -39,8 +45,11 @@ fn main() {
   dbg!(&trimmed_contents);
   let iterentries = trimmed_contents.split("\n");
   dbg!(&iterentries);
-  let priorities = iterentries.map(|ruckstring| get_priority(ruckstring));
-  dbg!(&priorities);
+  let rucks = iterentries.collect::<Vec<&str>>();
+  let ruckchunks = rucks.chunks(3);
+  //dbg!(ruckchunks.collect::<Vec<&[&str]>>());
+  let priorities = ruckchunks.map(|ruckstrings| get_priority(ruckstrings.to_vec()));
+  //dbg!(priorities.collect::<Vec<u32>>());
   let prioritysum: u32 = priorities.sum();
   dbg!(prioritysum);
 }
