@@ -23,8 +23,7 @@ fn main() {
   dbg!(&iterelves);
   let mut elfsums: Vec<i32> = iterelves.map(|elfstring| sum_elves(elfstring)).collect();
   elfsums.sort();
-  elfsums = elfsums.into_iter().rev().collect();
-  dbg!(&elfsums[0..3]);
-  let topsum: i32 = elfsums[0..3].iter().sum();
+  let topiter = elfsums.into_iter().rev().take(3);
+  let topsum: i32 = topiter.sum();
   dbg!(topsum);
 }
