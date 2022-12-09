@@ -21,7 +21,10 @@ fn main() {
   dbg!(&trimmed_contents);
   let iterelves = trimmed_contents.split("\n\n");
   dbg!(&iterelves);
-  let elfsums = iterelves.map(|elfstring| sum_elves(elfstring));
-  let max: i32 = elfsums.fold(std::i32::MIN, |a,b| a.max(b));
-  dbg!(max);
+  let mut elfsums: Vec<i32> = iterelves.map(|elfstring| sum_elves(elfstring)).collect();
+  elfsums.sort();
+  elfsums = elfsums.into_iter().rev().collect();
+  dbg!(&elfsums[0..3]);
+  let topsum: i32 = elfsums[0..3].iter().sum();
+  dbg!(topsum);
 }
