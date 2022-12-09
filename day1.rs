@@ -21,6 +21,7 @@ fn main() {
   dbg!(&trimmed_contents);
   let iterelves = trimmed_contents.split("\n\n");
   dbg!(&iterelves);
-  let max: i32 = iterelves.map(|elfstring| sum_elves(elfstring)).fold(std::i32::MIN, |a,b| a.max(b));
+  let elfsums = iterelves.map(|elfstring| sum_elves(elfstring));
+  let max: i32 = elfsums.fold(std::i32::MIN, |a,b| a.max(b));
   dbg!(max);
 }
