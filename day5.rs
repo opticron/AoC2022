@@ -25,10 +25,11 @@ fn get_alteration_details(stateline: &str) -> (u32, usize, usize) {
 
 fn perform_state_alteration(state: &mut Vec<Vec<char>>, stateline: &str) {
   let (count, source, dest) = get_alteration_details(stateline);
-  for _i in 0..count {
-    let item_moved = state[source].pop().expect("Out of elements to pop?");
-    state[dest].push(item_moved);
-  }
+  let slen = state[source].len();
+  let sslice = slen - count as usize;
+  let mut items_moved: Vec<char> = (&state[source][sslice..slen]).to_vec();
+  state[source].truncate(sslice);
+  state[dest].append(&mut items_moved);
   dbg!(state);
 }
 
