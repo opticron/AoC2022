@@ -1,25 +1,19 @@
 use std::fs;
 use std::env;
+use std::collections::HashMap;
+
+fn has_dups(string: Vec<char>) -> bool {
+  let mut map = HashMap::<char, u32>::new();
+  for mychar in &string {
+    map.insert(*mychar, 0);
+  }
+  map.keys().len() != string.len()
+}
 
 fn find_marker_index(line: &str) -> u32 {
   let chars: Vec<char> = line.chars().collect();
   for i in 0..chars.len() {
-    if chars[i] == chars[i+1] {
-      continue;
-    }
-    if chars[i] == chars[i+2] {
-      continue;
-    }
-    if chars[i] == chars[i+3] {
-      continue;
-    }
-    if chars[i+1] == chars[i+2] {
-      continue;
-    }
-    if chars[i+1] == chars[i+3] {
-      continue;
-    }
-    if chars[i+2] == chars[i+3] {
+    if has_dups(chars[i..i+4].to_vec()) {
       continue;
     }
     return i as u32 + 4;
