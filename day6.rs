@@ -13,10 +13,10 @@ fn has_dups(string: Vec<char>) -> bool {
 fn find_marker_index(line: &str) -> u32 {
   let chars: Vec<char> = line.chars().collect();
   for i in 0..chars.len() {
-    if has_dups(chars[i..i+4].to_vec()) {
+    if has_dups(chars[i..i+14].to_vec()) {
       continue;
     }
-    return i as u32 + 4;
+    return i as u32 + 14;
   }
   0
 }
