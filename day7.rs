@@ -76,16 +76,13 @@ fn main() {
 
   // scan the structure recursively to find dirs smaller than 100000
   let mut all_totals: Vec<u64> = Vec::new();
-  find_sizes(&mut all_totals, &root, &"");
+  let all_used = find_sizes(&mut all_totals, &root, &"");
   dbg!(&all_totals);
-  let mut total: u64 = 0;
-  for size in all_totals {
-    if size > 100000 {
-      continue;
-    }
-    total += size;
-  }
-  println!("Total sizes <=100000: {}", total);
+  let current_free = 70000000 - all_used;
+  let target_free = 30000000;
+  let deficit_space = target_free - current_free;
+  let smallest_deletion = all_totals.iter().filter(|x| x > &&deficit_space).min().expect("no elements?");
+  println!("smallest deletion: {}", smallest_deletion);
 }
 
 fn find_sizes<'a>(all_totals: &mut Vec<u64>, dirent: &DirEnt<'a>, _curdir: &'a str) -> u64 {
