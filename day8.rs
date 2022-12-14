@@ -10,59 +10,98 @@ fn main() {
         .expect("Failed to strip suffix?");
   let treelists: Vec<&str> = trimmed_contents.split("\n").collect();
 
-  let mut tree_map: Vec<Vec<i16>> = Vec::new();
-  let mut seen_trees: Vec<Vec<bool>> = Vec::new();
+  let mut tree_map: Vec<Vec<u32>> = Vec::new();
+  let mut view_score: Vec<Vec<u32>> = Vec::new();
 
   for treelist in treelists {
-    let tree_line: Vec<i16> = treelist.chars().map(|entry| entry as i16 - '0' as i16).collect();
-    let mut tree_line_seen: Vec<bool> = Vec::new();
+    let tree_line: Vec<u32> = treelist.chars().map(|entry| entry as u32 - '0' as u32).collect();
+    let mut view_score_line: Vec<u32> = Vec::new();
     for _i in 0..tree_line.len() {
-      tree_line_seen.push(false);
-    }
-    let mut highest_seen: i16 = -1;
-    let mut highest_seen_rev: i16 = -1;
-    for i in 0..tree_line.len() {
-      let i_rev = &tree_line.len() - i - 1;
-      let current = tree_line[i];
-      let current_rev = tree_line[i_rev];
-      if current > highest_seen {
-        highest_seen = current;
-        tree_line_seen[i] = true;
-      }
-      if current_rev > highest_seen_rev {
-        highest_seen_rev = current_rev;
-        tree_line_seen[i_rev] = true;
-      }
+      view_score_line.push(0);
     }
     tree_map.push(tree_line);
-    seen_trees.push(tree_line_seen);
+    view_score.push(view_score_line);
   }
 
-  for j in 0..tree_map[0].len() {
-    let mut highest_seen: i16 = -1;
-    let mut highest_seen_rev: i16 = -1;
-    for i in 0..tree_map.len() {
-      let i_rev = tree_map.len() - i - 1;
-      let current = tree_map[i][j];
-      let current_rev = tree_map[i_rev][j];
-      if current > highest_seen {
-        highest_seen = current;
-        seen_trees[i][j] = true;
+  let mut max_view_score: u32 = 0;
+  for i in 0..tree_map.len() {
+    if i == 0 || i == tree_map.len() - 1 {
+      continue;
+    }
+    for j in 0..tree_map[0].len() {
+      if j == 0 || j == tree_map[0].len() - 1 {
+        continue;
       }
-      if current_rev > highest_seen_rev {
-        highest_seen_rev = current_rev;
-        seen_trees[i_rev][j] = true;
+      view_score[i][j] = find_view_score(&tree_map, i, j);
+      if view_score[i][j] > max_view_score {
+        max_view_score = view_score[i][j];
       }
     }
   }
+  println!("Max viewable: {}", max_view_score);
+}
 
-  let mut total_seen: i16 = 0;
-  for a in seen_trees {
-    for b in a {
-      if b {
-        total_seen += 1;
+fn find_view_score(tree_map: &Vec<Vec<u32>>, i: usize, j: usize) -> u32 {
+  let height: u32 = tree_map[i][j];
+  let mut udist: usize = 0;
+  let mut ddist: usize = 0;
+  let mut ldist: usize = 0;
+  let mut rdist: usize = 0;
+  let mut utrack: bool = true;
+  let mut dtrack: bool = true;
+  let mut ltrack: bool = true;
+  let mut rtrack: bool = true;
+  let mut offset: usize = 0;
+  loop {
+    offset += 1;
+    let mut still_checking: bool = false;
+    let ucheck: i64 = i as i64 - offset as i64;
+    if ucheck >= 0 && utrack {
+      // check up
+      still_checking = true;
+      let target_height = tree_map[ucheck as usize][j];
+      udist = offset;
+      if target_height >= height {
+        utrack = false;
       }
     }
+    let dcheck: i64 = i as i64 + offset as i64;
+    if dcheck < tree_map.len() as i64 && dtrack {
+      // check down
+      still_checking = true;
+      let target_height = tree_map[dcheck as usize][j];
+      ddist = offset;
+      if target_height >= height {
+        dtrack = false;
+      }
+    }
+    let lcheck: i64 = j as i64 - offset as i64;
+    if lcheck >= 0 && ltrack {
+      // check left
+      still_checking = true;
+      let target_height = tree_map[i][lcheck as usize];
+      ldist = offset;
+      if target_height >= height {
+        ltrack = false;
+      }
+    }
+    let rcheck: i64 = j as i64 + offset as i64;
+    if rcheck < tree_map[0].len() as i64 && rtrack {
+      // check right
+      still_checking = true;
+      let target_height = tree_map[i][rcheck as usize];
+      rdist = offset;
+      if target_height >= height {
+        rtrack = false;
+      }
+    }
+
+    if !still_checking {
+      break;
+    }
   }
-  println!("Total viewable trees: {}", total_seen);
+
+  // distances calculated, get view score
+  let score = udist * ddist * ldist * rdist;
+  score as u32
 }
