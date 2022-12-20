@@ -11,27 +11,34 @@ fn main() {
   let instructions: Vec<&str> = trimmed_contents.split("\n").collect();
 
   let mut x: i128 = 1;
-  let mut signal_strength_acc: i128 = 0;
+  let mut screen: Vec<char> = Vec::new();
   let mut cycle: u64 = 0;
   for ins in instructions {
     if ins == "noop" {
-      bump_cycle(&mut cycle, &x, &mut signal_strength_acc);
+      bump_cycle(&mut cycle, &x, &mut screen);
       continue;
     }
     // only other instruction is addx
-    bump_cycle(&mut cycle, &x, &mut signal_strength_acc);
+    bump_cycle(&mut cycle, &x, &mut screen);
     let modif: i128 = ins.strip_prefix("addx ").expect("missing prefix").parse::<i128>().expect("bad input");
-    bump_cycle(&mut cycle, &x, &mut signal_strength_acc);
+    bump_cycle(&mut cycle, &x, &mut screen);
     x += modif;
   }
-  println!("final signal strength accum: {}", signal_strength_acc);
+
+  for i in 0..6 {
+    for j in 0..40 {
+      print!("{}", screen[i*40+j]);
+    }
+    println!("");
+  }
 }
 
-fn bump_cycle(cycle: &mut u64, x: &i128, signal_strength_acc: &mut i128) {
-  *cycle += 1;
-  if (*cycle as i128 - 20) % 40 == 0 {
-    let sig_strength: i128 = x*((*cycle) as i128);
-    println!("sig strength at cycle {}: {}", *cycle, sig_strength);
-    *signal_strength_acc += sig_strength;
+fn bump_cycle(cycle: &mut u64, x: &i128, screen: &mut Vec<char>) {
+  let diff = x - (*cycle as i128 % 40);
+  if diff.abs() < 2 {
+    screen.push('#');
+  } else {
+    screen.push('.');
   }
+  *cycle += 1;
 }
