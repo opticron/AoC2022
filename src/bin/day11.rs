@@ -1,7 +1,8 @@
 use std::fs;
 use std::env;
 use std::collections::VecDeque;
-use std::convert::TryInto;
+extern crate num_bigint;
+use num_bigint::BigUint;
 
 #[derive(Debug)]
 enum Operation {
@@ -11,7 +12,7 @@ enum Operation {
 
 #[derive(Debug)]
 struct Monkey {
-  items: VecDeque<u32>,
+  items: VecDeque<BigUint>,
   operation: Operation,
   operand: i32,
   test_operand: u32,
@@ -26,7 +27,7 @@ impl Monkey {
     // extract number and verify
     let header_index = monkey_desc_parts[0].strip_suffix(":").expect("missing colon").strip_prefix("Monkey ").expect("missing header").parse::<u32>().expect("bad monkey number");
     assert!(header_index == index, "index offset");
-    let mitems: VecDeque<u32> = monkey_desc_parts[1].strip_prefix("  Starting items: ").expect("missing item header").split(", ").map(|a| a.parse::<u32>().expect("bad item number")).collect();
+    let mitems: VecDeque<BigUint> = monkey_desc_parts[1].strip_prefix("  Starting items: ").expect("missing item header").split(", ").map(|a| a.parse::<BigUint>().expect("bad item number")).collect();
     let ops_parts: Vec<&str> = monkey_desc_parts[2].strip_prefix("  Operation: new = old ").expect("missing operation header").split(" ").collect();
     let test_op = monkey_desc_parts[3].strip_prefix("  Test: divisible by ").expect("missing test header").parse::<u32>().expect("bad test number");
     let test_true = monkey_desc_parts[4].strip_prefix("    If true: throw to monkey ").expect("missing true header").parse::<usize>().expect("bad true number");
@@ -60,11 +61,25 @@ fn main() {
   for _i in 0..20 {
     for i in 0..monkeys.len() {
       while monkeys[i].items.len() > 0 {
-        let worry = monkeys[i].items.pop_front().expect("guaranteed to exist");
-        let operand = match monkeys[i].operand {-1=>worry,_=>monkeys[i].operand.try_into().unwrap()};
-        let new_worry = match monkeys[i].operation {Operation::Add=>worry+operand,Operation::Multiply=>worry*operand} / 3;
-        let push_target = match new_worry % monkeys[i].test_operand {0=>monkeys[i].true_target,_=>monkeys[i].false_target};
-        monkeys[push_target].items.push_back(new_worry);
+        let mut worry = monkeys[i].items.pop_front().expect("guaranteed to exist");
+        let absop = BigUint::from(monkeys[i].operand.abs() as u32);
+        if monkeys[i].operand == -1 {
+          match monkeys[i].operation {
+          Operation::Add => worry *= BigUint::from(2 as u32),
+          _ => worry = worry.pow(2)
+          };
+        } else {
+          match monkeys[i].operation {
+          Operation::Add => worry += absop,
+          _ => worry *= absop
+          };
+        }
+        worry /= BigUint::from(3 as u32);
+        let mut push_target = monkeys[i].false_target;
+        if &worry % BigUint::from(monkeys[i].test_operand) == BigUint::from(0 as u32) {
+          push_target = monkeys[i].true_target;
+        }
+        monkeys[push_target].items.push_back(worry);
         monkeys[i].items_inspected += 1;
       }
     }
