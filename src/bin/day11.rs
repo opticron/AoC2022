@@ -83,9 +83,13 @@ fn main() {
         monkeys[i].items_inspected += 1;
       }
     }
+    //dbg!(&monkeys);
+    println!("Finished round {}", _i);
   }
   let mut scores: Vec<u32> = monkeys.iter().map(|a| a.items_inspected).collect();
   scores.sort();
+  dbg!(&scores);
   let top: Vec<u32> = scores.into_iter().rev().take(2).collect();
+  dbg!(&top);
   println!("Monkey business: {}", top[0]*top[1]);
 }
