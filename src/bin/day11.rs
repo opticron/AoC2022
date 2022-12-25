@@ -84,8 +84,9 @@ fn main() {
         monkeys[i].items_inspected += 1;
       }
     }
-    //dbg!(&monkeys);
-    println!("Finished round {}", _i);
+    if _i % 1000 == 0 {
+      println!("Finished round {}", _i);
+    }
   }
   let mut scores: Vec<u32> = monkeys.iter().map(|a| a.items_inspected).collect();
   scores.sort();
