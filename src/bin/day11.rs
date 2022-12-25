@@ -59,7 +59,15 @@ fn main() {
     monkeys.push(Monkey::new(monkeys.len() as u32, monkey_desc));
   }
 
-  for _i in 0..20 {
+  dbg!(&monkeys);
+  let mut lcd: u32 = 1;
+  for monkey in &monkeys {
+    lcd *= monkey.test_operand;
+    println!("test operand: {}", monkey.test_operand);
+  }
+  println!("lcd: {}", lcd);
+
+  for _i in 0..10000 {
     for i in 0..monkeys.len() {
       while monkeys[i].items.len() > 0 {
         let mut worry = monkeys[i].items.pop_front().expect("guaranteed to exist");
@@ -75,7 +83,7 @@ fn main() {
           _ => worry *= absop
           };
         }
-        worry /= Integer::from(3 as u32);
+        worry %= Integer::from(lcd);
         let mut push_target = monkeys[i].false_target;
         if &worry % Integer::from(monkeys[i].test_operand) == Integer::from(0 as u32) {
           push_target = monkeys[i].true_target;
@@ -93,5 +101,5 @@ fn main() {
   dbg!(&scores);
   let top: Vec<u32> = scores.into_iter().rev().take(2).collect();
   dbg!(&top);
-  println!("Monkey business: {}", top[0]*top[1]);
+  println!("Monkey business: {}", (top[0] as u64)*(top[1] as u64));
 }
